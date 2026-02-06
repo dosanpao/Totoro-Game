@@ -20,6 +20,7 @@ class Game {
             colorSelection: new ColorSelectionScreen(this),
             level: new LevelScreen(this),
             transition: new TransitionScreen(this),
+            cutscene: new CutsceneScreen(this),
             valentine: new ValentineScreen(this)
         };
         

@@ -693,8 +693,8 @@ class LevelScreen {
             // Go to next level
             this.game.changeScreen('level', this.currentLevelIndex + 1);
         } else {
-            // All levels complete - go to transition
-            this.game.changeScreen('transition');
+            // All levels complete - go to cutscene (new cinematic sequence)
+            this.game.changeScreen('cutscene');
         }
     }
 

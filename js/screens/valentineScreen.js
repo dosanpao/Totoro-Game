@@ -1,23 +1,28 @@
 /**
  * VALENTINE SCREEN
  * The final reveal - asking "Will you be my Valentine?"
+ * Now a beautiful, screenshot-ready aesthetic screen
  */
 
 class ValentineScreen {
     constructor(game) {
         this.game = game;
-        this.guide = new Guide(CONFIG.canvas.width / 2, CONFIG.canvas.height / 2);
+        
+        // State
         this.celebrating = false;
         this.celebrationTimer = 0;
+        this.fadeInProgress = 0;
+        this.buttonSetup = false;
         
-        // Setup both "Yes" buttons
-        document.getElementById('yesBtn1').addEventListener('click', () => {
-            this.celebrate();
-        });
+        // Player light at center
+        this.playerLight = null;
         
-        document.getElementById('yesBtn2').addEventListener('click', () => {
-            this.celebrate();
-        });
+        // Floating hearts and particles
+        this.floatingHearts = [];
+        this.sparkles = [];
+        
+        // Background gradient animation
+        this.gradientPhase = 0;
     }
 
     /**
@@ -26,52 +31,135 @@ class ValentineScreen {
     enter() {
         Utils.hideAllScreens();
         Utils.showUI('valentineUI');
+        
         this.celebrating = false;
         this.celebrationTimer = 0;
+        this.fadeInProgress = 0;
+        this.gradientPhase = 0;
         
-        // Update valentine question with personalized dialogue
-        const valentineText = this.game.getPersonalizedDialogue(CONFIG.dialogue.valentine);
-        document.getElementById('valentineQuestion').textContent = valentineText;
+        // Get player's chosen light color
+        const lightColor = this.game.state.lightColor || CONFIG.lightColors[0];
+        
+        // Initialize player light at center
+        this.playerLight = {
+            x: CONFIG.canvas.width / 2,
+            y: CONFIG.canvas.height / 2 - 50,
+            size: 40,
+            color: lightColor.color,
+            glow: lightColor.glow,
+            pulsePhase: 0
+        };
+        
+        // Initialize floating hearts
+        this.floatingHearts = this.initFloatingHearts();
+        
+        // Initialize sparkles
+        this.sparkles = this.initSparkles();
+        
+        // Setup buttons (only once)
+        if (!this.buttonSetup) {
+            this.setupButtons();
+            this.buttonSetup = true;
+        }
+    }
+    
+    /**
+     * Setup button handlers
+     */
+    setupButtons() {
+        const yesBtn1 = document.getElementById('yesBtn1');
+        const yesBtn2 = document.getElementById('yesBtn2');
+        
+        if (yesBtn1) {
+            yesBtn1.addEventListener('click', () => this.celebrate());
+        }
+        
+        if (yesBtn2) {
+            yesBtn2.addEventListener('click', () => this.celebrate());
+        }
+    }
+    
+    /**
+     * Initialize floating hearts
+     */
+    initFloatingHearts() {
+        const hearts = [];
+        for (let i = 0; i < 12; i++) {
+            hearts.push({
+                x: Math.random() * CONFIG.canvas.width,
+                y: CONFIG.canvas.height + Math.random() * 200,
+                size: 15 + Math.random() * 15,
+                speed: 0.3 + Math.random() * 0.4,
+                sway: Math.random() * Math.PI * 2,
+                swaySpeed: 0.02 + Math.random() * 0.02,
+                alpha: 0.3 + Math.random() * 0.4
+            });
+        }
+        return hearts;
+    }
+    
+    /**
+     * Initialize sparkles
+     */
+    initSparkles() {
+        const sparkles = [];
+        for (let i = 0; i < 25; i++) {
+            sparkles.push({
+                x: Math.random() * CONFIG.canvas.width,
+                y: Math.random() * CONFIG.canvas.height,
+                size: 1 + Math.random() * 2,
+                alpha: Math.random(),
+                phase: Math.random() * Math.PI * 2,
+                speed: 0.03 + Math.random() * 0.03
+            });
+        }
+        return sparkles;
     }
 
     /**
-     * Trigger celebration animation
+     * Trigger celebration
      */
     celebrate() {
         if (this.celebrating) return;
         
         this.celebrating = true;
         
-        // Hide buttons
-        Utils.hideUI('valentineUI');
+        // Hide buttons, show affectionate message
+        const valentineBox = document.querySelector('.valentine-box');
+        if (valentineBox) {
+            valentineBox.innerHTML = `
+                <h2 class="celebration-final-message">I'm really glad it's you.</h2>
+            `;
+        }
         
-        // Show celebration overlay
-        Utils.showUI('celebrationOverlay');
-        
-        // Create floating hearts
-        this.createHearts();
+        // Create burst of hearts
+        this.createHeartBurst();
     }
-
+    
     /**
-     * Create floating hearts animation
+     * Create heart particle burst
      */
-    createHearts() {
-        const container = document.getElementById('heartsContainer');
-        container.innerHTML = ''; // Clear existing
+    createHeartBurst() {
+        const centerX = CONFIG.canvas.width / 2;
+        const centerY = CONFIG.canvas.height / 2 - 50;
         
-        const hearts = ['💖', '💕', '💗', '💓', '💝', '🧸', '✨', '🌸'];
-        
-        // Create 30 hearts
-        for (let i = 0; i < 30; i++) {
-            setTimeout(() => {
-                const heart = document.createElement('div');
-                heart.className = 'heart';
-                heart.textContent = hearts[Math.floor(Math.random() * hearts.length)];
-                heart.style.left = Math.random() * 100 + '%';
-                heart.style.animationDelay = Math.random() * 0.5 + 's';
-                heart.style.animationDuration = (3 + Math.random() * 2) + 's';
-                container.appendChild(heart);
-            }, i * 100);
+        for (let i = 0; i < 20; i++) {
+            const angle = (i / 20) * Math.PI * 2;
+            const speed = 2 + Math.random() * 2;
+            
+            this.floatingHearts.push({
+                x: centerX,
+                y: centerY,
+                vx: Math.cos(angle) * speed,
+                vy: Math.sin(angle) * speed - 1, // Upward bias
+                size: 12 + Math.random() * 10,
+                speed: 0,
+                sway: 0,
+                swaySpeed: 0.03,
+                alpha: 1,
+                isBurst: true,
+                life: 180
+            });
         }
     }
 
@@ -79,64 +167,159 @@ class ValentineScreen {
      * Update valentine screen
      */
     update() {
-        this.guide.update();
+        // Fade in
+        if (this.fadeInProgress < 1) {
+            this.fadeInProgress += 0.01;
+        }
         
+        // Update gradient animation
+        this.gradientPhase += 0.003;
+        
+        // Update player light pulse
+        if (this.playerLight) {
+            this.playerLight.pulsePhase += 0.05;
+        }
+        
+        // Update floating hearts
+        this.updateFloatingHearts();
+        
+        // Update sparkles
+        this.updateSparkles();
+        
+        // Update celebration
         if (this.celebrating) {
             this.celebrationTimer++;
         }
+    }
+    
+    /**
+     * Update floating hearts
+     */
+    updateFloatingHearts() {
+        for (let i = this.floatingHearts.length - 1; i >= 0; i--) {
+            const heart = this.floatingHearts[i];
+            
+            if (heart.isBurst) {
+                // Burst particles
+                heart.x += heart.vx;
+                heart.y += heart.vy;
+                heart.vy += 0.05; // Gravity
+                heart.life--;
+                heart.alpha = heart.life / 180;
+                
+                if (heart.life <= 0) {
+                    this.floatingHearts.splice(i, 1);
+                }
+            } else {
+                // Floating hearts
+                heart.y -= heart.speed;
+                heart.sway += heart.swaySpeed;
+                heart.x += Math.sin(heart.sway) * 0.5;
+                
+                // Reset when off screen
+                if (heart.y < -50) {
+                    heart.y = CONFIG.canvas.height + 50;
+                    heart.x = Math.random() * CONFIG.canvas.width;
+                }
+            }
+        }
+    }
+    
+    /**
+     * Update sparkles
+     */
+    updateSparkles() {
+        this.sparkles.forEach(sparkle => {
+            sparkle.phase += sparkle.speed;
+            sparkle.alpha = (Math.sin(sparkle.phase) + 1) / 2;
+        });
     }
 
     /**
      * Draw valentine screen
      */
     draw(ctx) {
-        // Romantic gradient background
-        const gradient = ctx.createRadialGradient(
-            CONFIG.canvas.width / 2,
-            CONFIG.canvas.height / 2,
-            0,
-            CONFIG.canvas.width / 2,
-            CONFIG.canvas.height / 2,
-            CONFIG.canvas.width / 2
-        );
-        gradient.addColorStop(0, '#fff0f5');
-        gradient.addColorStop(1, '#ffe8f0');
-        ctx.fillStyle = gradient;
-        ctx.fillRect(0, 0, CONFIG.canvas.width, CONFIG.canvas.height);
+        // Pastel animated gradient background
+        this.drawAnimatedBackground(ctx);
         
-        // Draw floating hearts in background
-        this.drawBackgroundHearts(ctx);
+        // Apply fade in
+        ctx.globalAlpha = this.fadeInProgress;
         
-        // Draw guide holding a heart
-        this.guide.draw(ctx, true);
+        // Draw sparkles
+        this.drawSparkles(ctx);
         
-        // If celebrating, draw extra effects
+        // Draw floating hearts
+        this.drawFloatingHearts(ctx);
+        
+        // Draw player light at center
+        this.drawPlayerLight(ctx);
+        
+        // If celebrating, add extra glow
         if (this.celebrating) {
-            this.drawCelebrationEffects(ctx);
+            this.drawCelebrationGlow(ctx);
         }
+        
+        ctx.globalAlpha = 1;
     }
 
     /**
-     * Draw hearts floating in background
+     * Draw animated pastel gradient background
      */
-    drawBackgroundHearts(ctx) {
-        const time = Date.now() / 1000;
+    drawAnimatedBackground(ctx) {
+        const colors = [
+            { r: 255, g: 240, b: 245 }, // Light pink
+            { r: 255, g: 235, b: 250 }, // Lavender pink
+            { r: 255, g: 245, b: 235 }, // Peach
+            { r: 250, g: 240, b: 255 }  // Soft purple
+        ];
         
-        for (let i = 0; i < 12; i++) {
-            const x = (Math.sin(time * 0.3 + i) * 0.4 + 0.5) * CONFIG.canvas.width;
-            const y = (Math.cos(time * 0.2 + i * 0.7) * 0.4 + 0.5) * CONFIG.canvas.height;
-            const scale = 0.5 + Math.sin(time * 2 + i) * 0.2;
-            const alpha = 0.2 + Math.sin(time * 1.5 + i) * 0.1;
-            
+        const phase = (Math.sin(this.gradientPhase) + 1) / 2;
+        const index = Math.floor(phase * (colors.length - 1));
+        const nextIndex = Math.min(index + 1, colors.length - 1);
+        const blend = (phase * (colors.length - 1)) % 1;
+        
+        const c1 = colors[index];
+        const c2 = colors[nextIndex];
+        
+        const r = Math.floor(c1.r + (c2.r - c1.r) * blend);
+        const g = Math.floor(c1.g + (c2.g - c1.g) * blend);
+        const b = Math.floor(c1.b + (c2.b - c1.b) * blend);
+        
+        const gradient = ctx.createRadialGradient(
+            CONFIG.canvas.width / 2, CONFIG.canvas.height / 2, 0,
+            CONFIG.canvas.width / 2, CONFIG.canvas.height / 2, CONFIG.canvas.width
+        );
+        
+        gradient.addColorStop(0, `rgb(${Math.min(255, r + 10)}, ${Math.min(255, g + 10)}, ${Math.min(255, b + 10)})`);
+        gradient.addColorStop(1, `rgb(${r}, ${g}, ${b})`);
+        
+        ctx.fillStyle = gradient;
+        ctx.fillRect(0, 0, CONFIG.canvas.width, CONFIG.canvas.height);
+    }
+
+    /**
+     * Draw sparkles
+     */
+    drawSparkles(ctx) {
+        this.sparkles.forEach(sparkle => {
+            ctx.fillStyle = `rgba(255, 215, 180, ${sparkle.alpha * 0.7})`;
+            ctx.beginPath();
+            ctx.arc(sparkle.x, sparkle.y, sparkle.size, 0, Math.PI * 2);
+            ctx.fill();
+        });
+    }
+
+    /**
+     * Draw floating hearts
+     */
+    drawFloatingHearts(ctx) {
+        this.floatingHearts.forEach(heart => {
             ctx.save();
-            ctx.translate(x, y);
-            ctx.scale(scale, scale);
-            ctx.globalAlpha = alpha;
-            
-            this.drawHeart(ctx, 0, 0, 15, '#ffb3ba');
-            
+            ctx.globalAlpha = heart.alpha;
+            ctx.translate(heart.x, heart.y);
+            this.drawHeart(ctx, 0, 0, heart.size, '#ffb3ba');
             ctx.restore();
-        }
+        });
     }
 
     /**
@@ -156,27 +339,89 @@ class ValentineScreen {
     }
 
     /**
-     * Draw celebration effects
+     * Draw player light at center
      */
-    drawCelebrationEffects(ctx) {
-        const time = this.celebrationTimer / 60;
+    drawPlayerLight(ctx) {
+        if (!this.playerLight) return;
         
-        // Pulsing glow
-        const glowSize = 150 + Math.sin(time * 4) * 30;
-        Utils.drawGlow(ctx, CONFIG.canvas.width / 2, CONFIG.canvas.height / 2, glowSize, 'rgba(255, 179, 186, 0.4)');
+        const light = this.playerLight;
+        const pulse = 1 + Math.sin(light.pulsePhase) * 0.15;
         
-        // Sparkle burst
-        for (let i = 0; i < 30; i++) {
-            const angle = (i / 30) * Math.PI * 2;
-            const distance = time * 100;
-            const x = CONFIG.canvas.width / 2 + Math.cos(angle) * distance;
-            const y = CONFIG.canvas.height / 2 + Math.sin(angle) * distance;
-            const alpha = Math.max(0, 1 - time);
+        // Enhanced glow layers
+        for (let i = 5; i >= 0; i--) {
+            const glowRadius = (light.size + i * 18) * pulse;
+            const alpha = (0.35 - i * 0.06) * pulse;
             
-            ctx.fillStyle = `rgba(255, 215, 155, ${alpha})`;
+            const gradient = ctx.createRadialGradient(
+                light.x, light.y, 0,
+                light.x, light.y, glowRadius
+            );
+            
+            gradient.addColorStop(0, this.hexToRgba(light.color, alpha));
+            gradient.addColorStop(0.5, this.hexToRgba(light.glow, alpha * 0.6));
+            gradient.addColorStop(1, 'transparent');
+            
+            ctx.fillStyle = gradient;
             ctx.beginPath();
-            ctx.arc(x, y, 3, 0, Math.PI * 2);
+            ctx.arc(light.x, light.y, glowRadius, 0, Math.PI * 2);
             ctx.fill();
         }
+        
+        // Core light
+        ctx.fillStyle = light.color;
+        ctx.beginPath();
+        ctx.arc(light.x, light.y, light.size / 2 * pulse, 0, Math.PI * 2);
+        ctx.fill();
+        
+        // Bright center
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.95)';
+        ctx.beginPath();
+        ctx.arc(light.x, light.y, (light.size / 4) * pulse, 0, Math.PI * 2);
+        ctx.fill();
+        
+        // Orbiting particles
+        const time = Date.now() / 1000;
+        for (let i = 0; i < 8; i++) {
+            const angle = (time + i * Math.PI / 4) * 0.5;
+            const distance = 50 + Math.sin(time * 2 + i) * 10;
+            const px = light.x + Math.cos(angle) * distance;
+            const py = light.y + Math.sin(angle) * distance;
+            const particleAlpha = Math.sin(time * 3 + i) * 0.5 + 0.5;
+            
+            ctx.fillStyle = this.hexToRgba(light.glow, particleAlpha * 0.6);
+            ctx.beginPath();
+            ctx.arc(px, py, 3, 0, Math.PI * 2);
+            ctx.fill();
+        }
+    }
+
+    /**
+     * Draw celebration glow effect
+     */
+    drawCelebrationGlow(ctx) {
+        const pulseIntensity = Math.sin(this.celebrationTimer * 0.1) * 0.3 + 0.7;
+        
+        const gradient = ctx.createRadialGradient(
+            CONFIG.canvas.width / 2, CONFIG.canvas.height / 2 - 50, 0,
+            CONFIG.canvas.width / 2, CONFIG.canvas.height / 2 - 50, 200
+        );
+        
+        gradient.addColorStop(0, `rgba(255, 200, 220, ${0.3 * pulseIntensity})`);
+        gradient.addColorStop(1, 'transparent');
+        
+        ctx.fillStyle = gradient;
+        ctx.beginPath();
+        ctx.arc(CONFIG.canvas.width / 2, CONFIG.canvas.height / 2 - 50, 200, 0, Math.PI * 2);
+        ctx.fill();
+    }
+
+    /**
+     * Convert hex to rgba
+     */
+    hexToRgba(hex, alpha) {
+        const r = parseInt(hex.slice(1, 3), 16);
+        const g = parseInt(hex.slice(3, 5), 16);
+        const b = parseInt(hex.slice(5, 7), 16);
+        return `rgba(${r}, ${g}, ${b}, ${alpha})`;
     }
 }
