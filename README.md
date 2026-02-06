@@ -1,10 +1,10 @@
 # 🌲 My Little Light - A Cozy Valentine Adventure
 
-A delightful 2D web-based game where you play as a glowing light character with a customizable color, exploring six unique forest levels to ultimately receive a sweet Valentine's Day message. Navigate peaceful collection challenges in the first three levels, then face an escalating threat from a mysterious Black Light in levels 4-6.
+A delightful 2D web-based game where you play as a glowing light character with a customizable color, exploring eight unique forest levels to ultimately receive a sweet Valentine's Day message. Navigate peaceful collection challenges in the first three levels, then face an escalating threat from a mysterious Black Light in levels 4-6, before experiencing two emotionally powerful finale levels where light meets light.
 
 ## 📋 Overview
 
-Choose your light color, then guide your glowing character through six distinct levels while collecting magical orbs with the help of your companion character (a cute Totoro-inspired guide). The game starts peaceful and cozy, but introduces tension and challenge as a dark entity begins pursuing you. After completing all levels, the game transitions into a heartfelt Valentine's Day reveal.
+Choose your light color, then guide your glowing character through eight distinct levels while collecting magical orbs with the help of your companion character (a cute Totoro-inspired guide). The game starts peaceful and cozy, introduces tension and challenge as a dark entity begins pursuing you, then culminates in two beautiful finale levels about connection and light. After completing all levels, the game transitions into a heartfelt Valentine's Day reveal.
 
 ## 🎮 Game Flow
 
@@ -12,6 +12,7 @@ Choose your light color, then guide your glowing character through six distinct 
 Title Screen → Name Input → Tutorial → Color Selection → 
   Level 1 (Easy) → Level 2 (Obstacles) → Level 3 (Peaceful) → 
   Level 4 (Black Light!) → Level 5 (Faster!) → Level 6 (Final Test!) → 
+  Level 7 (Crossing Lights) → Level 8 (Held Against the Dark) →
   Transition → Valentine Reveal 💖
 ```
 
@@ -30,15 +31,18 @@ Title Screen → Name Input → Tutorial → Color Selection →
 
 ### 🎯 Gameplay
 - **Smooth Physics-Based Movement**: Acceleration, deceleration, and momentum feel natural
-- **6 Unique Levels**:
+- **8 Unique Levels**:
   1. **Awakening Grove** - Easy introduction, no threats
   2. **Whispering Woods** - Medium difficulty with obstacles
   3. **Heartwood Haven** - Peaceful, romantically themed
   4. **Fading Grove** - Black Light introduction (slow chase)
   5. **Eclipse Path** - Increased difficulty (faster chase)
   6. **Last Light Clearing** - Final dramatic challenge
-- **Progressive Difficulty**: Peaceful start → escalating tension → dramatic climax
+  7. **Crossing Lights** - Two lights meeting in the center
+  8. **Held Against the Dark** - Together against the darkness
+- **Progressive Difficulty**: Peaceful start → escalating tension → dramatic climax → emotional resolution
 - **Black Light Mechanic**: A dark entity chases you in levels 4-6, creating urgency
+- **Second Light Mechanic**: An AI-controlled companion light appears in levels 7-8
 - **Dual Control Schemes**: Use either Arrow Keys OR WASD
 
 ### ✨ Visual Polish
@@ -52,11 +56,14 @@ Title Screen → Name Input → Tutorial → Color Selection →
 - **Player Light**: Customizable glowing orb with physics-based movement
 - **Guide Character**: Totoro-inspired lazy egg companion offering encouragement
 - **Black Light**: Menacing dark entity that pursues you (Levels 4-6)
+- **Second Light**: AI-controlled companion light that mirrors your movements (Levels 7-8)
+- **Shadow Entities**: Circling darkness that must be avoided (Level 8)
 
 ### 🎭 Story Arc
 - **Act 1 (Levels 1-3)**: Restore the forest's magic peacefully
 - **Act 2 (Levels 4-6)**: Face a growing darkness that threatens everything
-- **Act 3**: Emotional Valentine's Day reveal as a reward
+- **Act 3 (Levels 7-8)**: Light finds light, love conquers darkness
+- **Epilogue**: Emotional Valentine's Day reveal as a reward
 
 ## 🎯 Levels in Detail
 
@@ -107,6 +114,26 @@ Title Screen → Name Input → Tutorial → Color Selection →
 - **Obstacles**: 4 barriers (provide safe zones)
 - **Special**: **Black Light spawns in center** (Speed: 2.5)
 - **Atmosphere**: Intense, epic finale
+
+### Level 7: Crossing Lights
+- **Difficulty**: ⭐ Easy (Narrative Focus)
+- **Theme**: Two lights meeting
+- **Orbs**: 0 (no collection)
+- **Obstacles**: None
+- **Special**: **AI companion light** - both lights move to center
+- **Mechanics**: Player and second light automatically converge
+- **Atmosphere**: Gentle, romantic, peaceful
+- **Message**: "Sometimes... light finds light."
+
+### Level 8: Held Against the Dark
+- **Difficulty**: ⭐⭐⭐ Medium (Survival Focus)
+- **Theme**: Standing together against darkness
+- **Orbs**: 0 (no collection)
+- **Obstacles**: None
+- **Special**: **Second light stays close** - waves of shadow entities appear
+- **Mechanics**: Stay near your companion as darkness circles
+- **Atmosphere**: Tense but hopeful, protective
+- **Message**: "Together, nothing can touch you."
 
 ## 🕹️ Controls
 
@@ -210,6 +237,10 @@ dialogue: {
     level4Start: "Wait{name}... something feels wrong...",
     level5Start: "The shadow grows bolder{name}...",
     level6Start: "This is the final test{name}...",
+    
+    // Levels 7-8 dialogue about connection and love
+    level7Start: "Sometimes{name}... light finds light.",
+    level8Start: "Together{name}, nothing can touch you.",
     
     valentine: "Will you be my Valentine{name}?"  // ← The big reveal!
 }
@@ -490,14 +521,18 @@ The game uses a **narrative difficulty arc**:
 3. **Level 4** - Introduce threat (manageable)
 4. **Level 5** - Escalate tension (challenging)
 5. **Level 6** - Climactic finale (intense but fair)
-6. **Valentine** - Emotional payoff
+6. **Level 7** - Tender moment (narrative focus, no challenge)
+7. **Level 8** - Together against darkness (moderate survival challenge)
+8. **Valentine** - Emotional payoff
 
 ### Emotional Journey
 - **Beginning**: Curiosity and learning
 - **Middle**: Peaceful, meditative flow state
 - **Turn**: Surprise and rising tension (Black Light appears)
 - **Climax**: Achievement through challenge
-- **Resolution**: Love and connection (Valentine reveal)
+- **Denouement**: Connection and unity (lights meeting)
+- **Resolution**: Love and protection (together against darkness)
+- **Finale**: Declaration of love (Valentine reveal)
 
 ### Color Psychology
 Each light color evokes different feelings:
@@ -520,13 +555,13 @@ Each light color evokes different feelings:
 
 ## 📊 Game Statistics
 
-- **Total Levels**: 6
+- **Total Levels**: 8 (6 gameplay + 2 narrative)
 - **Total Orbs**: 31 across all levels
 - **Light Colors**: 6 options
 - **Screens**: 7 unique screens
-- **Code Size**: ~2000 lines of JavaScript
+- **Code Size**: ~2500 lines of JavaScript
 - **Dependencies**: 0 (100% vanilla!)
-- **Estimated Playtime**: 15-20 minutes
+- **Estimated Playtime**: 20-25 minutes
 - **Difficulty Range**: Easy to Hard
 - **Replayability**: High (different colors, challenge runs)
 
@@ -593,6 +628,6 @@ Feel free to customize and use this game for personal projects! If you create so
 
 Made with 💚 for a special someone 💖
 
-**TL;DR:** A cozy light-collecting adventure with escalating tension, culminating in a sweet Valentine's message. Play as a customizable glowing orb, navigate 6 levels (3 peaceful, 3 with chase mechanic), and experience a heartwarming reveal. Pure vanilla JavaScript, no dependencies, runs in any modern browser.
+**TL;DR:** A cozy light-collecting adventure with escalating tension and emotional connection, culminating in a sweet Valentine's message. Play as a customizable glowing orb, navigate 8 levels (3 peaceful, 3 with chase mechanic, 2 narrative-focused about love and connection), and experience a heartwarming reveal. Pure vanilla JavaScript, no dependencies, runs in any modern browser.
 
-**Quick Start:** Open `index.html` → Choose color → Collect orbs → Avoid darkness → Receive Valentine! 💖
+**Quick Start:** Open `index.html` → Choose color → Collect orbs → Avoid darkness → Meet your light → Stand together → Receive Valentine! 💖
