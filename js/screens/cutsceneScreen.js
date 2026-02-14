@@ -33,12 +33,10 @@ class CutsceneScreen {
         this.dialogueLines = [
             "I know this started as just a little game…",
             "But every part of it was made with you in mind.",
-            "Every color. Every moment of light finding its way.",
-            "I wanted to make something peaceful.",
-            "Something warm.",
-            "Something that felt like how you make me feel.",
-            "And I guess what I'm really trying to say is—",
-            "I want you to be my little light."
+            "I wanted to make something chill.",
+            "And something fun.",
+            "So, I was hoping you'd help me shine brighter and be...",
+            "My Little Light."
         ];
         
         // Timing
@@ -63,6 +61,9 @@ class CutsceneScreen {
         this.sceneOpacity = 0;
         this.orbitAngle = 0;
         this.gradientPhase = 0;
+        
+        // BLOCK ALL INPUT - This is a non-interactive cutscene
+        this.blockInput();
         
         // Get player's chosen light color
         const lightColor = this.game.state.lightColor || CONFIG.lightColors[0];
@@ -94,6 +95,66 @@ class CutsceneScreen {
         // Initialize particles
         this.particles = [];
         this.sparkles = this.initSparkles();
+    }
+    
+    /**
+     * Block all input during cutscene
+     */
+    blockInput() {
+        // Prevent all keyboard input
+        this.keydownBlocker = (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            return false;
+        };
+        
+        // Prevent all click input
+        this.clickBlocker = (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            return false;
+        };
+        
+        // Add blockers
+        document.addEventListener('keydown', this.keydownBlocker, true);
+        document.addEventListener('keyup', this.keydownBlocker, true);
+        document.addEventListener('keypress', this.keydownBlocker, true);
+        document.addEventListener('click', this.clickBlocker, true);
+        document.addEventListener('mousedown', this.clickBlocker, true);
+        document.addEventListener('mouseup', this.clickBlocker, true);
+        
+        // Also block on canvas specifically
+        const canvas = this.game.canvas;
+        if (canvas) {
+            canvas.addEventListener('click', this.clickBlocker, true);
+            canvas.addEventListener('mousedown', this.clickBlocker, true);
+        }
+    }
+    
+    /**
+     * Remove input blockers when leaving
+     */
+    unblockInput() {
+        if (this.keydownBlocker) {
+            document.removeEventListener('keydown', this.keydownBlocker, true);
+            document.removeEventListener('keyup', this.keydownBlocker, true);
+            document.removeEventListener('keypress', this.keydownBlocker, true);
+            this.keydownBlocker = null;
+        }
+        
+        if (this.clickBlocker) {
+            document.removeEventListener('click', this.clickBlocker, true);
+            document.removeEventListener('mousedown', this.clickBlocker, true);
+            document.removeEventListener('mouseup', this.clickBlocker, true);
+            
+            const canvas = this.game.canvas;
+            if (canvas) {
+                canvas.removeEventListener('click', this.clickBlocker, true);
+                canvas.removeEventListener('mousedown', this.clickBlocker, true);
+            }
+            
+            this.clickBlocker = null;
+        }
     }
 
     /**
@@ -229,6 +290,9 @@ class CutsceneScreen {
         this.sceneOpacity = 1 - (this.timer / this.fadeToValentineDuration);
         
         if (this.timer >= this.fadeToValentineDuration) {
+            // IMPORTANT: Unblock input before transitioning
+            this.unblockInput();
+            
             // Transition to new Valentine screen
             this.game.changeScreen('valentine');
         }

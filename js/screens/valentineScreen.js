@@ -1,7 +1,7 @@
 /**
  * VALENTINE SCREEN
- * The final reveal - asking "Will you be my Valentine?"
- * Now a beautiful, screenshot-ready aesthetic screen
+ * The final reveal - displaying "Will you be my Valentine?"
+ * A beautiful, screenshot-ready aesthetic screen
  */
 
 class ValentineScreen {
@@ -12,7 +12,6 @@ class ValentineScreen {
         this.celebrating = false;
         this.celebrationTimer = 0;
         this.fadeInProgress = 0;
-        this.buttonSetup = false;
         
         // Player light at center
         this.playerLight = null;
@@ -37,6 +36,9 @@ class ValentineScreen {
         this.fadeInProgress = 0;
         this.gradientPhase = 0;
         
+        // Block keyboard input
+        this.blockKeyboard();
+        
         // Get player's chosen light color
         const lightColor = this.game.state.lightColor || CONFIG.lightColors[0];
         
@@ -55,27 +57,42 @@ class ValentineScreen {
         
         // Initialize sparkles
         this.sparkles = this.initSparkles();
-        
-        // Setup buttons (only once)
-        if (!this.buttonSetup) {
-            this.setupButtons();
-            this.buttonSetup = true;
+
+        // Show the valentine message as pure text — no buttons, no choices
+        const valentineBox = document.querySelector('.valentine-box');
+        if (valentineBox) {
+            valentineBox.innerHTML = `
+                <p class="valentine-question">Will you be my Valentine?</p>
+            `;
         }
     }
     
     /**
-     * Setup button handlers
+     * Block keyboard input (accessibility: allow Tab)
      */
-    setupButtons() {
-        const yesBtn1 = document.getElementById('yesBtn1');
-        const yesBtn2 = document.getElementById('yesBtn2');
+    blockKeyboard() {
+        this.keyboardBlocker = (e) => {
+            if (e.key !== 'Tab') {
+                e.preventDefault();
+                e.stopPropagation();
+                return false;
+            }
+        };
         
-        if (yesBtn1) {
-            yesBtn1.addEventListener('click', () => this.celebrate());
-        }
-        
-        if (yesBtn2) {
-            yesBtn2.addEventListener('click', () => this.celebrate());
+        document.addEventListener('keydown', this.keyboardBlocker, true);
+        document.addEventListener('keyup', this.keyboardBlocker, true);
+        document.addEventListener('keypress', this.keyboardBlocker, true);
+    }
+    
+    /**
+     * Unblock keyboard when leaving (cleanup)
+     */
+    unblockKeyboard() {
+        if (this.keyboardBlocker) {
+            document.removeEventListener('keydown', this.keyboardBlocker, true);
+            document.removeEventListener('keyup', this.keyboardBlocker, true);
+            document.removeEventListener('keypress', this.keyboardBlocker, true);
+            this.keyboardBlocker = null;
         }
     }
     
@@ -117,53 +134,6 @@ class ValentineScreen {
     }
 
     /**
-     * Trigger celebration
-     */
-    celebrate() {
-        if (this.celebrating) return;
-        
-        this.celebrating = true;
-        
-        // Hide buttons, show affectionate message
-        const valentineBox = document.querySelector('.valentine-box');
-        if (valentineBox) {
-            valentineBox.innerHTML = `
-                <h2 class="celebration-final-message">I'm really glad it's you.</h2>
-            `;
-        }
-        
-        // Create burst of hearts
-        this.createHeartBurst();
-    }
-    
-    /**
-     * Create heart particle burst
-     */
-    createHeartBurst() {
-        const centerX = CONFIG.canvas.width / 2;
-        const centerY = CONFIG.canvas.height / 2 - 50;
-        
-        for (let i = 0; i < 20; i++) {
-            const angle = (i / 20) * Math.PI * 2;
-            const speed = 2 + Math.random() * 2;
-            
-            this.floatingHearts.push({
-                x: centerX,
-                y: centerY,
-                vx: Math.cos(angle) * speed,
-                vy: Math.sin(angle) * speed - 1, // Upward bias
-                size: 12 + Math.random() * 10,
-                speed: 0,
-                sway: 0,
-                swaySpeed: 0.03,
-                alpha: 1,
-                isBurst: true,
-                life: 180
-            });
-        }
-    }
-
-    /**
      * Update valentine screen
      */
     update() {
@@ -185,11 +155,6 @@ class ValentineScreen {
         
         // Update sparkles
         this.updateSparkles();
-        
-        // Update celebration
-        if (this.celebrating) {
-            this.celebrationTimer++;
-        }
     }
     
     /**
@@ -253,11 +218,6 @@ class ValentineScreen {
         
         // Draw player light at center
         this.drawPlayerLight(ctx);
-        
-        // If celebrating, add extra glow
-        if (this.celebrating) {
-            this.drawCelebrationGlow(ctx);
-        }
         
         ctx.globalAlpha = 1;
     }
@@ -393,26 +353,6 @@ class ValentineScreen {
             ctx.arc(px, py, 3, 0, Math.PI * 2);
             ctx.fill();
         }
-    }
-
-    /**
-     * Draw celebration glow effect
-     */
-    drawCelebrationGlow(ctx) {
-        const pulseIntensity = Math.sin(this.celebrationTimer * 0.1) * 0.3 + 0.7;
-        
-        const gradient = ctx.createRadialGradient(
-            CONFIG.canvas.width / 2, CONFIG.canvas.height / 2 - 50, 0,
-            CONFIG.canvas.width / 2, CONFIG.canvas.height / 2 - 50, 200
-        );
-        
-        gradient.addColorStop(0, `rgba(255, 200, 220, ${0.3 * pulseIntensity})`);
-        gradient.addColorStop(1, 'transparent');
-        
-        ctx.fillStyle = gradient;
-        ctx.beginPath();
-        ctx.arc(CONFIG.canvas.width / 2, CONFIG.canvas.height / 2 - 50, 200, 0, Math.PI * 2);
-        ctx.fill();
     }
 
     /**

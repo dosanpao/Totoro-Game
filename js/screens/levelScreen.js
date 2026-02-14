@@ -58,6 +58,9 @@ class LevelScreen {
         this.fadeStartTime = 0;
         this.dialogueFadeOpacity = 1;
         this.dialogueClickBound = false;
+        
+        // Clean up any existing canvas click handler first
+        this.cleanupCanvasClick();
         this.canvasClickBound = false;
         
         // Clean up any existing Enter key handler from level complete
@@ -689,12 +692,26 @@ class LevelScreen {
             this.enterKeyHandler = null;
         }
         
+        // Clean up canvas click handler
+        this.cleanupCanvasClick();
+        
         if (this.currentLevelIndex < CONFIG.levels.length - 1) {
             // Go to next level
             this.game.changeScreen('level', this.currentLevelIndex + 1);
         } else {
             // All levels complete - go to cutscene (new cinematic sequence)
             this.game.changeScreen('cutscene');
+        }
+    }
+    
+    /**
+     * Clean up canvas click handler
+     */
+    cleanupCanvasClick() {
+        if (this.canvasClickHandler && this.game.canvas) {
+            this.game.canvas.removeEventListener('click', this.canvasClickHandler);
+            this.canvasClickHandler = null;
+            this.canvasClickBound = false;
         }
     }
 
